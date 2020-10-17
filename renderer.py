@@ -9,10 +9,12 @@ class Renderer(object):
     self.width = 50
     self.images = {}
     self.lookahead_frames = 90
-    images = [f for f in listdir(path) if isfile(join(path, f))]
-    for im in images:
+    images = [(f, f"{path}/{f}") for f in listdir(path) if isfile(join(path, f))]
+    images.append(("_record", "img/record.png"))
+    images.append(("_play", "img/play.png"))
+    for key, im in images:
       print(f"Loading {im}")
-      self.images[im.split(".")[0]] = pygame.image.load(f"{path}/{im}")
+      self.images[key.split(".")[0]] = pygame.image.load(im)
 
 
 
@@ -59,6 +61,9 @@ class Renderer(object):
 
     for i, row in enumerate(self.rows):
       self.render_row(row, state, screen, (self.width + self.padding)*i + self.padding, icons_to_render)
+    
+    if state.is_recording:
+      self.draw_im(screen, '_record', ((w - self.width)/2,(h - self.width)/2))
 
 
   def add_direction_row(self, button_name):

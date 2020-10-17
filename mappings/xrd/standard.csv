@@ -4,7 +4,10 @@ S,Key,3
 H,Key,1
 D,Key,5
 M,Hat,0
-Play,Key,4
+Play,Key,6
 Record,PosAxis,2
 S,NegAxis,2
 H,NegAxis,2
+P,Key,4
+K,Key,4
+S,Key,4

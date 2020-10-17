@@ -1,6 +1,7 @@
 import os
 import pygame
 import tkinter as tk
+from game import games
 
 def to_label(filename):
   s = filename.split(".")[0]
@@ -25,15 +26,36 @@ class GameWindow(tk.Tk):
     os.environ['SDL_WINDOWID'] = str(self.winfo_id())
     os.environ['SDL_VIDEODRIVER'] = 'windib'
 
+  def recursive_menu(self, folder, root):
+    submenu = tk.Menu(self, tearoff=0)
+    subdir = root if folder is "" else f"{root}/{folder}"
+    for seq in os.listdir(subdir):
+      subseq = seq if folder is "" else f"{folder}/{seq}"
+      abspath = f"{subdir}/{seq}"
+      if os.path.isfile(abspath):
+        submenu.add_command(label=to_label(seq),
+          command=lambda subseq=subseq: self.state.reload_sequence(subseq))
+      elif os.path.isdir(abspath):
+        subsubmenu = self.recursive_menu(subseq, root)
+        submenu.add_cascade(label=to_label(seq), menu=subsubmenu)
+
+    return submenu
+
   def reload_context_menu(self):
     self.popup_menu = tk.Menu(self, tearoff=0)
+
+    ## Add menu to change mode
+    modemenu = tk.Menu(self, tearoff=0)
+    for m in games:
+      modemenu.add_command(label=m.name,
+                           command=lambda m=m: self.state.reload_mode(m))
+    self.popup_menu.add_cascade(label=f"Current mode: {self.state.mode.name}", menu=modemenu)
+
     self.popup_menu.add_command(label="Reload",
                                 command=lambda : self.state.reload_last_sequence())
-    submenu = tk.Menu(self, tearoff=0)
-    seqs = os.listdir(f"sequence/{self.state.mode}")
-    for s in seqs:
-      submenu.add_command(label=to_label(s),
-                          command=lambda s=s: self.state.reload_sequence(s))
+
+    ## Add menu to change sequence
+    submenu = self.recursive_menu("", self.state.mode.sequences)
     self.popup_menu.add_cascade(label="Sequences", menu=submenu)
 
     self.popup_menu.add_command(label="Quit",

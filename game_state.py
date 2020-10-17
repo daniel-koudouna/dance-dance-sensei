@@ -1,5 +1,6 @@
 from datetime import datetime
 import csv
+import os
 import pygame
 import time
 import threading
@@ -27,34 +28,44 @@ def hat_to_dir(hat):
     return 5
 
 class GameState(object):
-  def __init__(self, mode):
-    self.mode = mode
-    self.game_buttons = []
-    self.buttons = {}
-    self.input_thread = None
+  def __init__(self, mode, device):
     self.is_running = True
-    self.is_recording = False
-    self.renderer = Renderer(f"img/{mode}")
-    self.sequence = []
-    self.last_sequence = None
-    self.last_reloaded = 0
-    self.idx = 0
     self.window = None
+    self.device = device
+    self.device.init()
+    self.reload_mode(mode)
 
   def render(self, screen):
     self.idx += 1
     self.renderer.render(self, screen)
 
+  def reload_mode(self, mode):
+    self.last_reloaded = 0
+    self.idx = 0
+    self.mode = mode
+    self.last_sequence = None
+    self.sequence = []
+    self.is_recording = False
+    self.buttons = {}
+    self.game_buttons = []
+    self.mappings = {}
+    self.renderer = Renderer(mode.visuals)
+    mode.renderer(self.renderer)
+    if self.window is not None:
+      self.window.reload_context_menu()
+    
+    mappings = os.listdir(self.mode.mappings)
+    self.reload_gamepad(mappings[0])
 
   def reload_last_sequence(self):
     self.reload_sequence(self.last_sequence)
 
   def reload_sequence(self, filename):
-    seq_file = f"sequence/{self.mode}/{filename}"
+    seq_file = f"{self.mode.sequences}/{filename}"
     self.last_sequence = filename 
     self.last_reloaded = 0
     self.is_playing = True
-    self.idx = -300
+    self.idx = -60
     self.sequence = []
     lines = open(seq_file).readlines()
     for line in lines:
@@ -66,12 +77,10 @@ class GameState(object):
         self.sequence.append({"type": "button", "buttons": [str(char) for char in l if (char != ' ')] })
 
 
-  def reload_gamepad(self, device, filename):
-    self.device = device
-    self.device.init()
+  def reload_gamepad(self, filename):
     self.game_buttons = []
     self.mappings = {}
-    mapping_file = open(filename)
+    mapping_file = open(f"{self.mode.mappings}/{filename}")
     lines = csv.reader(mapping_file)
     for row in lines:
       print(row)
@@ -102,9 +111,9 @@ class GameState(object):
       else:
         self.recorded_sequence.append("5")
 
-    if self.buttons['Play'] and self.last_reloaded > 100 and self.last_sequence is not None and not self.is_recording:
+    if 'Play' in self.buttons and self.buttons['Play'] and self.last_reloaded > 100 and self.last_sequence is not None and not self.is_recording:
       self.reload_last_sequence()
-    if self.buttons['Record']:
+    if 'Record' in self.buttons and self.buttons['Record']:
       if self.is_recording and self.last_reloaded > 100:
         self.stop_recording()
       elif self.last_reloaded > 100:
@@ -123,7 +132,7 @@ class GameState(object):
     print(self.recorded_sequence)
     today = datetime.now()
     fname = today.strftime("%Y_%m_%d_%H_%M_%S")
-    filename = f"sequence/{self.mode}/{fname}_{len(self.recorded_sequence)}.txt"
+    filename = f"{self.mode.sequences}/{fname}_{len(self.recorded_sequence)}.txt"
     lines = [l + "\n" for l in self.recorded_sequence]
     open(filename, "w").writelines(lines)
     self.window.reload_context_menu()
