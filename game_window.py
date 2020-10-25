@@ -1,7 +1,9 @@
 import os
 import pygame
+import threading
 import tkinter as tk
 from game import games
+from option_window import OptionWindow
 
 def to_label(filename):
   s = filename.split(".")[0]
@@ -13,10 +15,16 @@ class GameWindow(tk.Tk):
     tk.Tk.__init__(self, *args, **kwargs)
     self.state = state
     self.state.window = self
+    self.options = None
     self.x = None
     self.y = None
     self.overrideredirect(True)
-    self.geometry("360x800")  # Whatever size
+
+    config = state.config
+    width = state.config['display']['width']
+    height = state.config['display']['height']
+
+    self.geometry(f"{width}x{height}+100+100")  # Whatever size
     self.attributes('-topmost', 1)
     self.wm_attributes('-alpha',0.7)
     self['bg'] = '#000'
@@ -28,9 +36,9 @@ class GameWindow(tk.Tk):
 
   def recursive_menu(self, folder, root):
     submenu = tk.Menu(self, tearoff=0)
-    subdir = root if folder is "" else f"{root}/{folder}"
+    subdir = root if folder == "" else f"{root}/{folder}"
     for seq in os.listdir(subdir):
-      subseq = seq if folder is "" else f"{folder}/{seq}"
+      subseq = seq if folder == "" else f"{folder}/{seq}"
       abspath = f"{subdir}/{seq}"
       if os.path.isfile(abspath):
         submenu.add_command(label=to_label(seq),
@@ -58,8 +66,17 @@ class GameWindow(tk.Tk):
     submenu = self.recursive_menu("", self.state.mode.sequences)
     self.popup_menu.add_cascade(label="Sequences", menu=submenu)
 
+    self.popup_menu.add_command(label="Options", command=self.show_options)
+
     self.popup_menu.add_command(label="Quit",
                                 command=self.stop)
+
+  def show_options(self):
+    self.options = tk.Toplevel(self)
+    self.options.title("Options")
+    self.options.geometry("+500+500")
+    self.options_window = OptionWindow(self.options, self.state)
+    self.options_window.refresh()
 
   def stop(self):
     self.state.is_running = False

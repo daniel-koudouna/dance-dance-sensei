@@ -29,6 +29,8 @@ class Renderer(object):
 
   def render_row(self, row, state, screen, x, icons_to_render):
     rowtype = row['type']
+    if row['button'] not in state.buttons:
+      return
     if rowtype == 'BUTTON':
       self.draw_im(screen, self.pressed(state, row['button']), (x, self.padding))
       for y,btns in icons_to_render:

@@ -1,10 +1,11 @@
 class Game(object):
   def __init__(self, **kwargs):
     self.name = kwargs["name"]
-    self.visuals = kwargs["visuals"]
-    self.sequences = kwargs["sequences"]
+    self.code = kwargs["code"]
+    self.visuals = f"img/{self.code}"
+    self.sequences = f"sequence/{self.code}"
+    self.mappings = f"mappings/{self.code}"
     self.renderer = kwargs["renderer"]
-    self.mappings = kwargs["mappings"]
 
 
 def guilty_gear_renderer(r):
@@ -17,9 +18,7 @@ def guilty_gear_renderer(r):
 
 
 guilty_gear_xrd = Game(name="Guilty Gear Xrd", 
-                       visuals="img/xrd", 
-                       sequences="sequence/xrd",
-                       mappings="mappings/xrd",
+                       code="xrd",
                        renderer=guilty_gear_renderer)
 
 
@@ -31,9 +30,7 @@ def pony_renderer(r):
   r.add_button_row("D")
 
 thems_fighting_herds = Game(name="Them's Fighting Herds", 
-                       visuals="img/tfh", 
-                       sequences="sequence/tfh",
-                       mappings="mappings/tfh",
+                       code="tfh",
                        renderer=pony_renderer)
 
 

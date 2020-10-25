@@ -1,55 +1,76 @@
 import pygame
+import threading
+import toml
+
 from game_window import GameWindow
 from game_state import GameState
 from game import games
 
-def main():
-  pygame.joystick.init()
+def first(lst, fn):
+  for l in lst:
+    if fn(l):
+      return l
+  return None
 
+def main():
+  config = toml.load("config.toml")
+
+
+  ## Find input method from config
+  pygame.joystick.init()
   joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
-  ## TODO select using config
-  joystick = joysticks[0]
+  input_method = None
 
-  ## TODO select using config
-  state = GameState(games[0], joystick)
+  if config['input']['method'] == 'joystick':
+    joy_num = config['input']['default_joystick']
+    joystick = joysticks[0]
+    input_method = joystick
+  else:
+    print("NON JOYSTICK NOT SUPPORTED YET")
+    exit(0)
+
+  ## Find game from config
+  game_id = config['game']['default_mode']
+  game = first(games, lambda x : x.code == game_id)
+
+  state = GameState(game, input_method, config)
   window = GameWindow(state)
-
-#  state.reload_gamepad(joystick, "mappings.csv")
 
   pygame.init()
 
-  ## TODO select using config
-  screen = pygame.display.set_mode((360,800))
+  ## Get window size
+  width = config['display']['width'] 
+  height = config['display']['height'] 
+  screen = pygame.display.set_mode((width,height))
 
   clock = pygame.time.Clock()
 
-  ## TODO measure using config
-  sz = 30
-  padding = 10
-  width = sz + padding
+  def pygamethread():
+    while state.is_running:
 
-  while state.is_running:
-    ##print(btn_state)
+      for event in pygame.event.get():
+        state.handle_event(event)
+        window.handle_event(event)
 
-    for event in pygame.event.get():
-      state.handle_event(event)
-      window.handle_event(event)
+      ## Drawing
+      screen.fill(pygame.Color('black'))
 
-    window.update()
-    ## Drawing
-    screen.fill(pygame.Color('black'))
+      state.update()
+      state.render(screen)
 
-    state.update()
-    state.render(screen)
-
-    ## End drawing
-    pygame.display.update()
-    clock.tick(60)
+      ## End drawing
+      pygame.display.update()
+      clock.tick(60)
 
 
-  pygame.quit()
-  state.is_running = False
+    pygame.quit()
+    state.is_running = False
+    window.quit()
+
+  threading.Thread(None, pygamethread).start()
+
+  window.mainloop()
 
 
 if __name__ == "__main__":

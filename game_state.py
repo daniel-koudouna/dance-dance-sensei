@@ -6,6 +6,7 @@ import time
 import threading
 
 from renderer import Renderer
+from network import Network
 
 def hat_to_dir(hat):
   if hat == (-1,-1):
@@ -28,12 +29,14 @@ def hat_to_dir(hat):
     return 5
 
 class GameState(object):
-  def __init__(self, mode, device):
+  def __init__(self, mode, device, config):
     self.is_running = True
     self.window = None
     self.device = device
     self.device.init()
     self.reload_mode(mode)
+    self.config = config
+    self.network = Network(self)
 
   def render(self, screen):
     self.idx += 1
@@ -132,8 +135,10 @@ class GameState(object):
     print(self.recorded_sequence)
     today = datetime.now()
     fname = today.strftime("%Y_%m_%d_%H_%M_%S")
-    filename = f"{self.mode.sequences}/{fname}_{len(self.recorded_sequence)}.txt"
+    filename = f"{self.mode.sequences}/personal/{fname}_{len(self.recorded_sequence)}.txt"
     lines = [l + "\n" for l in self.recorded_sequence]
+
+    os.makedirs(f"{self.mode.sequences}/personal", exist_ok=True)
     open(filename, "w").writelines(lines)
     self.window.reload_context_menu()
 
