@@ -1,4 +1,5 @@
 import os
+from pyupdater.client import Client
 import requests 
 import tkinter as tk
 from tkinter import ttk
@@ -6,8 +7,6 @@ from ttkwidgets import CheckboxTreeview
 import toml
 
 from game import games
-
-
 
 class OptionWindow(ttk.Notebook):
 
@@ -18,6 +17,12 @@ class OptionWindow(ttk.Notebook):
     if success:
       self.destroy()
 
+  def print_status_info(info):
+    total = info.get(u'total')
+    downloaded = info.get(u'downloaded')
+    status = info.get(u'status')
+    print(downloaded, total, status)
+
   def __init__(self, parent, state):
     super().__init__(parent)
     self.state = state
@@ -27,12 +32,13 @@ class OptionWindow(ttk.Notebook):
     downloadTab = ttk.Frame(self)
     uploadTab = ttk.Frame(self)
     accountTab = ttk.Frame(self)
-
+    updateTab = ttk.Frame(self)
 
     self.add(tab1, text="Preferences")
     self.add(accountTab, text="Account")
     self.add(uploadTab, text="Upload")
     self.add(downloadTab, text="Download")
+    self.add(updateTab, text="Update")
     self.pack(expand = 1, fill ="both") 
 
     ## Account management
@@ -75,14 +81,6 @@ class OptionWindow(ttk.Notebook):
         t.insert(parent, "end", f"{dirpath}/{d}", text=d)
       for f in files:
         t.insert(parent, "end", f"{dirpath}/{f}", text=f)
-    #t.insert("", 0, "1", text="1")
-    #t.insert("1", "end", "11", text="1")
-    #t.insert("1", "end", "12", text="2")
-    #t.insert("12", "end", "121", text="1")
-    #t.insert("12", "end", "122", text="2")
-    #t.insert("122", "end", "1221", text="1")
-    #t.insert("1", "end", "13", text="3")
-    #t.insert("13", "end", "131", text="1")
 
     ts = CheckboxTreeview(uploadTab)
     ts.grid(row=1,column=4,padx=10, pady=10, columnspan=3)
@@ -107,9 +105,17 @@ class OptionWindow(ttk.Notebook):
     b = ttk.Button(downloadTab, text="Add", command = lambda : self.add_follower(lb))
     b.grid(row=2, column=1, padx=10, pady=10)
 
-    bb = ttk.Button(downloadTab, text="Sync", command=self.state.network.download)
-    bb.grid(row=2, column=2, padx=10, pady=10)
+    b = ttk.Button(downloadTab, text="Sync", command=self.state.network.download)
+    b.grid(row=2, column=2, padx=10, pady=10)
+
+    ## Application update
+    b = ttk.Button(updateTab, text="Check for updates", command=self.try_update)
+    b.grid(row=0, column=0, padx=10, pady=10)
  
+  def try_update(self):
+    pass
+
+
  
   def add_follower(self, lb):
     follower = self.var_follower.get()
@@ -123,8 +129,8 @@ class OptionWindow(ttk.Notebook):
     self.var_follower.set("")
 
   def remove_follower(self, lb):
-    lb.delete(tk.ANCHOR)
     follower = lb.get(tk.ANCHOR)
+    lb.delete(tk.ANCHOR)
     self.state.config['network']['following'].remove(follower)
     toml.dump(self.state.config, open("config.toml", "w"))
 

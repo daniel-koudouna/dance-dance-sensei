@@ -6,11 +6,7 @@ from game_window import GameWindow
 from game_state import GameState
 from game import games
 
-def first(lst, fn):
-  for l in lst:
-    if fn(l):
-      return l
-  return None
+from utils import *
 
 def main():
   config = toml.load("config.toml")

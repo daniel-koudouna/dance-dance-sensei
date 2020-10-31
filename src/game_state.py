@@ -7,6 +7,7 @@ import threading
 
 from renderer import Renderer
 from network import Network
+from sequence import Sequence
 
 def hat_to_dir(hat):
   if hat == (-1,-1):
@@ -48,6 +49,7 @@ class GameState(object):
     self.mode = mode
     self.last_sequence = None
     self.sequence = []
+    self.parsed_sequence = None
     self.is_recording = False
     self.buttons = {}
     self.game_buttons = []
@@ -63,6 +65,9 @@ class GameState(object):
   def reload_last_sequence(self):
     self.reload_sequence(self.last_sequence)
 
+
+
+
   def reload_sequence(self, filename):
     seq_file = f"{self.mode.sequences}/{filename}"
     self.last_sequence = filename 
@@ -76,8 +81,8 @@ class GameState(object):
       if l == "5":
         self.sequence.append({"type": "empty"})
       else:
-        print(l)
         self.sequence.append({"type": "button", "buttons": [str(char) for char in l if (char != ' ')] })
+    self.parsed_sequence = Sequence(self.sequence, self.mode.motions, self.mode.charge_motions)
 
 
   def reload_gamepad(self, filename):
