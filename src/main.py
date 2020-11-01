@@ -1,6 +1,10 @@
+import os
 import pygame
+import shutil
 import threading
 import toml
+import traceback
+
 
 from game_window import GameWindow
 from game_state import GameState
@@ -9,28 +13,26 @@ from game import games
 from utils import *
 
 def main():
+  if not os.path.isfile("config.toml"):
+    shutil.copyfile("default_config.toml", "config.toml")
+
   config = toml.load("config.toml")
 
+  if 'game' not in config:
+    config['game'] = {}
+    config['game']['default_game'] = games[0].code
+    toml.dump(config, open("config.toml", "w"))
 
-  ## Find input method from config
-  pygame.joystick.init()
-  joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
-  input_method = None
 
-  if config['input']['method'] == 'joystick':
-    joy_num = config['input']['default_joystick']
-    joystick = joysticks[0]
-    input_method = joystick
-  else:
-    print("NON JOYSTICK NOT SUPPORTED YET")
-    exit(0)
+  ## Do initial config
+
 
   ## Find game from config
   game_id = config['game']['default_mode']
   game = first(games, lambda x : x.code == game_id)
 
-  state = GameState(game, input_method, config)
+  state = GameState(game, config)
   window = GameWindow(state)
 
   pygame.init()
@@ -42,22 +44,26 @@ def main():
 
   clock = pygame.time.Clock()
 
+
   def pygamethread():
-    while state.is_running:
+    try:
+      while state.is_running:
+        for event in pygame.event.get():
+          state.handle_event(event)
+          window.handle_event(event)
 
-      for event in pygame.event.get():
-        state.handle_event(event)
-        window.handle_event(event)
+        ## Drawing
+        screen.fill(pygame.Color('black'))
 
-      ## Drawing
-      screen.fill(pygame.Color('black'))
+        state.update()
+        state.render(screen)
 
-      state.update()
-      state.render(screen)
+        ## End drawing
+        pygame.display.update()
+        clock.tick(60)
+    except Exception:
+      traceback.print_exc()
 
-      ## End drawing
-      pygame.display.update()
-      clock.tick(60)
 
 
     pygame.quit()

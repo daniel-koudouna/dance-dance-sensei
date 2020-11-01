@@ -1,13 +1,14 @@
-P,Key,2
-K,Key,0
-S,Key,3
-H,Key,1
-D,Key,5
-M,Hat,0
-Play,Key,6
-Record,PosAxis,2
-S,NegAxis,2
-H,NegAxis,2
-P,Key,4
-K,Key,4
-S,Key,4
+P,Button,2, 0
+K,Button,0, 0
+S,Button,3, 0
+H,Button,1, 0
+D,Button,5, 0
+M,Hat,0,0
+Play,Button,6,0
+Record,PosAxis,2,0
+S,NegAxis,2,0
+H,NegAxis,2,0
+P,Button,4,0
+K,Button,4,0
+S,Button,4,0
+S,Keyboard,W,0

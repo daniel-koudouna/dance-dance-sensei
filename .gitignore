@@ -1,4 +1,4 @@
 .vscode/
-dist/
+dist/sensei/
 __pycache__
 sequence/**

@@ -1,0 +1,6 @@
+[network]
+url = "http://localhost:8010"
+
+[display]
+width = 380
+height = 800

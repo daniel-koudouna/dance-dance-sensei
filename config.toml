@@ -6,6 +6,7 @@ token = "ad94c24bedfcc6e21ac3589dd2b6bfab79cb11612ea99fd9818a27daa63d5bac9f79968
 [game]
 default_mode = "xrd"
 
+
 [input]
 method = "joystick"
 default_joystick = 0
