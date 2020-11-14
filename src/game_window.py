@@ -18,6 +18,7 @@ class GameWindow(tk.Tk):
     self.options = None
     self.x = None
     self.y = None
+    self.options_window : OptionWindow = None
     self.overrideredirect(True)
 
     config = state.config
@@ -73,10 +74,15 @@ class GameWindow(tk.Tk):
 
   def show_options(self):
     self.options = tk.Toplevel(self)
-    self.options.title("Options")
-    self.options.geometry("+500+500")
+    self.options.title("Dance Dance Sensei - Options")
+    self.options.geometry("+500+100")
+    self.options.iconbitmap('logo.ico')
     self.options_window = OptionWindow(self.options, self.state)
-    self.options_window.refresh()
+    self.refresh((None, None))
+
+  def refresh(self, event):
+    if self.options_window is not None:
+      self.options_window.refresh(event)
 
   def stop(self):
     self.state.is_running = False

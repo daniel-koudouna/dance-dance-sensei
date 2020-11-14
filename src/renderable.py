@@ -48,16 +48,6 @@ class ChargeInput(Renderable):
       k = self.release_key if ii == self.duration - 1 else self.hold_key
       row.renderer.draw_im(k, (row.x, y_step), 0.7)
 
-    ##row.renderer.draw_im(self.hold_key, (row.x, y_start))
-    ##for step in range(self.duration):
-    ##  if step % 7 != 0:
-    ##    continue
-    ##  pos = (self.frame + step - i)/(1.0*l)
-    ##  y_step = row.renderer.screen_height*pos
-    ##  row.renderer.draw_im(self.hold_key, (row.x, y_step))
-    ##row.renderer.draw_im(self.release_key, (row.x, y_end))
-    ##row.renderer.draw_im("0004", (row.x, y_start))
-
 class MotionInput(Renderable):
   def __init__(self, frame : int, motion : str, duration: int):
     self.frame = frame

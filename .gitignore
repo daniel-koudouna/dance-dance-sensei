@@ -1,4 +1,5 @@
 .vscode/
-dist/sensei/
+dist/**
 __pycache__
 sequence/**
+config.toml

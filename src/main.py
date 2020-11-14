@@ -24,12 +24,8 @@ def main():
     toml.dump(config, open("config.toml", "w"))
 
 
-
-  ## Do initial config
-
-
   ## Find game from config
-  game_id = config['game']['default_mode']
+  game_id = config['game']['default_game']
   game = first(games, lambda x : x.code == game_id)
 
   state = GameState(game, config)

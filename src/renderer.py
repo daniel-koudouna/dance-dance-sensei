@@ -14,10 +14,37 @@ class Renderer(object):
     images = [(f, f"{path}/{f}") for f in listdir(path) if isfile(join(path, f))]
     images.extend([(f, f"img/common/{f}") for f in listdir("img/common") if isfile(join("img/common", f))])
     for key, im in images:
-      print(key)
       self.images[key.split(".")[0]] = pygame.image.load(im)
+    
+    pygame.font.init()
+    self.font = pygame.font.Font('Roboto-Regular.ttf', 20)
 
 
+  def draw_im_free(self, im, pos, sz, align='center', opacity=1.0):
+    i = self.images[im]
+    w = i.get_width()
+    h = i.get_height()
+    sf = 1
+    r_img = w/h
+    r_container = sz[0]/sz[1]
+    if r_img > r_container:
+      sf = w/(1.0*sz[0])
+    else:
+      sf = h/(1.0*sz[1])
+    new_w = w/sf
+    new_h = h/sf
+    s = pygame.transform.scale(i, ((int)(new_w), (int)(new_h)))
+    off_x = 0
+    off_y = 0
+    if align == 'center':
+      off_x = (sz[0] - new_w)/2
+      off_y = (sz[1] - new_h)/2
+
+    if opacity < 1.0:
+      s.set_alpha((int)(255*opacity))
+
+    newpos = (pos[0] + off_x, pos[1] + off_y)
+    self.screen.blit(s, newpos)
 
   def draw_im(self, im, pos, scale=1.0):
     i = self.images[im]
@@ -29,16 +56,13 @@ class Renderer(object):
     self.screen.blit(pygame.transform.scale(self.images[im], ((int)(self.width*scale), (int)(newh*scale))), newpos)
 
   def pressed(self, button):
-    if self.state.buttons[button]:
+    if button in self.state.buttons and self.state.buttons[button]:
       return button
     else:
       return button + "_empty"
 
   def render_row(self, row, sequence):
-    pass
     rowtype = row.rowtype
-    if row.button not in self.state.buttons:
-      return
     if rowtype == 'BUTTON':
       self.draw_im(self.pressed(row.button), (row.x, self.padding))
       if sequence is None:
@@ -47,7 +71,10 @@ class Renderer(object):
         renderable.render(row)
 
     elif rowtype == 'DIRECTION':
-      self.draw_im(str(self.state.buttons[row.button]), (row.x, self.padding))
+      direction_draw = "5"
+      if row.button in self.state.buttons:
+        direction_draw = str(self.state.buttons[row.button])
+      self.draw_im(direction_draw, (row.x, self.padding))
       if sequence is None:
         return
       for renderable in sequence.objects:
@@ -66,9 +93,39 @@ class Renderer(object):
 
     seq = self.state.parsed_sequence
 
+    ## Render logo
+    logo_pad = 10
+    logo_size = 100
+    l_x = self.screen_width - logo_size - logo_pad
+    l_y = self.screen_height - logo_size - logo_pad
+    self.draw_im_free('logo', (l_x, l_y), (logo_size, logo_size), opacity=0.5)
+
     for i, row in enumerate(self.rows):
       row.x = (self.width + self.padding)*i + self.padding
       self.render_row(row, seq)
+
+    ## Move this into game state
+    registered = set([t[0] for t in state.mappings])
+    not_registered = set([b for b in state.mode.buttons if b not in registered])
+
+    not_registered.discard('Play')
+    not_registered.discard('Record')
+    if 'Movement' in registered:
+      not_registered.discard('Up')
+      not_registered.discard('Down')
+      not_registered.discard('Left')
+      not_registered.discard('Right')
+
+    if 'Up' in registered or 'Down' in registered or 'Left' in registered or 'Right' in registered:
+      not_registered.discard('Movement')
+
+    if len(not_registered) > 0:
+      text = self.font.render('Some buttons are not set', True, (255, 255, 255))
+      text2 = self.font.render('Right-click -> Options -> Controls', True, (255,255,255))
+      screen.blit(text, (10, 100))
+      screen.blit(text2, (10, 150))
+
+
 
     ##for i, row in enumerate(self.rows):
     ##  self.render_row(row, state, screen, (self.width + self.padding)*i + self.padding, icons_to_render)

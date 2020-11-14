@@ -5,6 +5,7 @@ import pygame
 import time
 import threading
 
+from game import Game
 from renderer import Renderer
 from network import Network
 from sequence import Sequence
@@ -19,12 +20,13 @@ class GameState(object):
     self.reload_mode(mode)
     self.config = config
     self.network = Network(self)
+    self.register_mode = None
 
   def render(self, screen):
     self.idx += 1
     self.renderer.render(self, screen)
 
-  def reload_mode(self, mode):
+  def reload_mode(self, mode : Game):
     self.last_reloaded = 0
     self.idx = 0
     self.mode = mode
@@ -34,17 +36,32 @@ class GameState(object):
     self.is_recording = False
     self.buttons = {}
     self.renderer = Renderer(mode.visuals)
+    os.makedirs(mode.sequences, exist_ok=True)
+
     mode.renderer(self.renderer)
     if self.window is not None:
       self.window.reload_context_menu()
     
-    mappings = os.listdir(self.mode.mappings)
-    self.reload_gamepad(mappings[0])
+    self.reload_gamepad(self.mode.mappings)
 
   def reload_last_sequence(self):
     self.reload_sequence(self.last_sequence)
 
 
+
+  def register_new_button(self, btn):
+    self.register_mode = btn
+
+  def clear_button(self, btn):
+    print(f"CLEARING BUTTON {btn}")
+    mapping_file = open(self.mode.mappings)
+    lines = [[s.strip() for s in l] for l in csv.reader(mapping_file) if len(l) == 4]
+    lines = [l for l in lines if l[0] != btn]
+    mapping_file.close()
+    mapping_file = open(self.mode.mappings, "w")
+    csv.writer(mapping_file).writerows(lines)
+    mapping_file.close()
+    self.reload_mode(self.mode)
 
 
   def reload_sequence(self, filename):
@@ -63,11 +80,21 @@ class GameState(object):
         self.sequence.append({"type": "button", "buttons": [str(char) for char in l if (char != ' ')] })
     self.parsed_sequence = Sequence(self.sequence, self.mode.motions, self.mode.charge_motions)
 
+  def refresh(self, event):
+    if self.window is not None:
+      self.window.refresh(event)
+
 
   def reload_gamepad(self, filename):
-    mapping_file = open(f"{self.mode.mappings}/{filename}")
+    if not os.path.isfile(filename):
+      f = open(filename, "w")
+      f.write("\n")
+      f.close()
+    mapping_file = open(filename)
     lines = [[s.strip() for s in l] for l in csv.reader(mapping_file) if len(l) == 4]
+    self.mappings = lines
     self.input_manager.set_mappings(self.mode, lines)
+    self.refresh(("mappings", None))
 
   def update(self):
     self.handle_input()
@@ -117,9 +144,23 @@ class GameState(object):
     self.window.reload_context_menu()
 
   def handle_event(self, event):
-    print(event)
     if event.type == pygame.QUIT:
       self.is_running = False
 
   def handle_input(self):
-    self.buttons = self.input_manager.poll()
+    if self.register_mode is None:
+      self.buttons = self.input_manager.poll()
+    else:
+      if self.register_mode == "Movement":
+        next_btn = self.input_manager.poll_full_motion()
+      else:
+        next_btn = self.input_manager.poll_full(self.register_mode)
+
+      if next_btn is not None:
+        self.register_mode = None
+        f = open(self.mode.mappings, "a")
+        csv.writer(f).writerow(next_btn)
+        f.close()
+        self.reload_gamepad(self.mode.mappings)
+
+

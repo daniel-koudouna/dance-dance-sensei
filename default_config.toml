@@ -1,5 +1,5 @@
 [network]
-url = "http://localhost:8010"
+url = "https://software.macdoniel.co.uk/sensei"
 
 [display]
 width = 380
