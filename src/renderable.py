@@ -21,32 +21,47 @@ class ChargeInput(Renderable):
     if row.rowtype != 'DIRECTION':
       return
 
-    i = row.renderer.state.idx
-    l = row.renderer.lookahead_frames
+    g = row.renderer
+
+    i = g.state.idx
+    l = g.lookahead_frames
     pos_start = (self.frame - i)/(1.0*l)
     pos_end = (self.frame + self.duration - i)/(1.0*l)
 
-    if pos_end < -0.2 or pos_start > 1.2:
+    if pos_end < -0.05 or pos_start > 1.2:
       return
 
-    y_start = row.renderer.screen_height*pos_start
-    y_end = row.renderer.screen_height*pos_end
+    y_start = g.padding + g.screen_height*max(0,pos_start)
+    y_end = g.padding + g.screen_height*max(0,pos_end)
 
-    row.renderer.draw_im("motion_start", (row.x, y_start))
-    row.renderer.draw_im("motion_end", (row.x, y_end))
+    g.draw_im("motion_start", (row.x, y_start))
+    g.draw_im("motion_end", (row.x, y_end))
 
-    for step in range(self.duration):
+    for step in range(1, self.duration):
       pos = (self.frame + step - i)/(1.0*l)
-      y_step = row.renderer.screen_height*pos
-      row.renderer.draw_im("motion_mid", (row.x, y_step))
+      y_step = g.padding + g.screen_height*max(0,pos)
+      g.draw_im("motion_mid", (row.x, y_step))
 
     for ii in range(self.duration):
       if ii % 7 != 0 and ii != self.duration - 1:
         continue
       p_step = (self.frame + (ii/(self.duration-1))*self.duration - i)/(1.0*l)
-      y_step = row.renderer.screen_height*p_step
-      k = self.release_key if ii == self.duration - 1 else self.hold_key
-      row.renderer.draw_im(k, (row.x, y_step), 0.7)
+      p_step_last = (self.frame + self.duration - i)/(1.0*l)
+
+      y_step = g.padding + g.screen_height*max(0,p_step)
+      k = "dot"
+      if ii == self.duration - 1:
+        k = self.release_key
+      if ii == 0:
+        k = self.hold_key
+
+      should_draw = (ii == self.duration -1) or \
+                    (ii == 0 and p_step_last > 0.01) or \
+                    p_step > 0.01
+
+
+      if should_draw:
+        g.draw_im(k, (row.x, y_step), 0.7)
 
 class MotionInput(Renderable):
   def __init__(self, frame : int, motion : str, duration: int):
@@ -58,29 +73,35 @@ class MotionInput(Renderable):
     if row.rowtype != 'DIRECTION':
       return
 
-    i = row.renderer.state.idx
-    l = row.renderer.lookahead_frames
+    g = row.renderer
+
+    i = g.state.idx
+    l = g.lookahead_frames
     pos_start = (self.frame - i)/(1.0*l)
     pos_end = (self.frame + self.duration - i)/(1.0*l)
 
-    if pos_end < -0.2 or pos_start > 1.2:
+    if pos_end < -0.05 or pos_start > 1.2:
       return
 
-    y_start = row.renderer.screen_height*pos_start
-    y_end = row.renderer.screen_height*pos_end
+    y_start = g.padding + g.screen_height*max(0,pos_start)
+    y_end = g.padding + g.screen_height*max(0,pos_end)
 
-    row.renderer.draw_im("motion_start", (row.x, y_start))
-    row.renderer.draw_im("motion_end", (row.x, y_end))
+    g.draw_im("motion_start", (row.x, y_start))
+    g.draw_im("motion_end", (row.x, y_end))
 
-    for step in range(self.duration):
+    for step in range(1,self.duration):
       pos = (self.frame + step - i)/(1.0*l)
-      y_step = row.renderer.screen_height*pos
-      row.renderer.draw_im("motion_mid", (row.x, y_step))
+      y_step = g.padding + g.screen_height*max(0,pos)
+      g.draw_im("motion_mid", (row.x, y_step))
 
     for ii, m in enumerate(self.motion):
       p_step = (self.frame + (ii/(len(self.motion)-1))*self.duration - i)/(1.0*l)
-      y_step = row.renderer.screen_height*p_step
-      row.renderer.draw_im(m, (row.x, y_step), 0.7)
+      ii_next = ii if ii == len(self.motion) - 1 else ii+1
+      p_step_next = (self.frame + (ii_next/(len(self.motion)-1))*self.duration - i)/(1.0*l)
+
+      y_step = g.padding + g.screen_height*max(0, p_step)
+      if ii == len(self.motion) - 1 or p_step_next > 0.01:
+        g.draw_im(m, (row.x, y_step), 0.7)
 
 
 class DirectionInput(Renderable):
@@ -93,16 +114,25 @@ class DirectionInput(Renderable):
     if row.rowtype != 'DIRECTION':
       return
 
-    i = row.renderer.state.idx
-    l = row.renderer.lookahead_frames
-    pos = (self.frame - i)/(1.0*l)
+    g = row.renderer
 
-    if pos < -0.2 or pos > 1.2:
+    i = g.state.idx
+    l = g.lookahead_frames
+    pos_start = (self.frame - i)/(1.0*l)
+    pos_end = (self.frame + self.duration - i)/(1.0*l)
+
+    if pos_end < -0.0 or pos_start > 1.2:
       return
 
-    y = row.renderer.screen_height*pos
-    row.renderer.draw_im(self.key, (row.x, y))
-    ## TODO draw for more than one frame
+    y_start = g.padding + g.screen_height*max(0,pos_start)
+    y_end = g.padding + g.screen_height*max(0,pos_end)
+
+    for step in range(1,self.duration):
+      pos = (self.frame + step - i)/(1.0*l)
+      y_step = g.padding + g.screen_height*max(0,pos)
+      g.draw_im(self.key, (row.x, y_step))
+
+    g.draw_im(self.key, (row.x, y_start))
 
 class ButtonInput(Renderable):
   def __init__(self, frame : int, key : str, duration : int):
@@ -114,13 +144,24 @@ class ButtonInput(Renderable):
     if row.rowtype != 'BUTTON' or row.button != self.key:
       return
 
-    i = row.renderer.state.idx
-    l = row.renderer.lookahead_frames
-    pos = (self.frame - i)/(1.0*l)
+    g = row.renderer
 
-    if pos < -0.2 or pos > 1.2:
+    i = g.state.idx
+    l = g.lookahead_frames
+    pos_start = (self.frame - i)/(1.0*l)
+    pos_end = (self.frame + self.duration - i)/(1.0*l)
+
+    if pos_end < -0.05 or pos_start > 1.2:
       return
 
-    y = row.renderer.screen_height*pos
-    row.renderer.draw_im(self.key, (row.x, y))
-    ## TODO draw for more than one frame
+
+    y_start = g.padding + g.screen_height*max(0, pos_start)
+    y_end = g.padding + g.screen_height*max(0, pos_end)
+
+    for step in range(1,self.duration):
+      pos = max(0, (self.frame + step - i)/(1.0*l))
+      y_step = g.padding + g.screen_height*pos
+      g.draw_im(self.key + "_", (row.x, y_step))
+
+    g.draw_im(self.key + "_end", (row.x, y_end))
+    g.draw_im(self.key, (row.x, y_start))

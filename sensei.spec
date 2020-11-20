@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['src\\main.py'],
              pathex=['C:\\Users\\Daniel\\Desktop\\ddrgg'],
              binaries=[],
-             datas=[('default_config.toml', '.'), ('img', 'img')],
+             datas=[('default_config.toml', '.'), ('version.txt', '.'), ('Roboto-Regular.ttf', '.'), ('logo.png', '.'), ('logo.ico', '.'), ('img', 'img')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True , icon='logo.ico')
+          console=False , icon='logo.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

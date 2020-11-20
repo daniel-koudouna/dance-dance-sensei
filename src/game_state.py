@@ -87,7 +87,8 @@ class GameState(object):
 
   def reload_gamepad(self, filename):
     if not os.path.isfile(filename):
-      f = open(filename, "w")
+      os.makedirs("mappings", exist_ok=True)
+      f = open(filename, "w+")
       f.write("\n")
       f.close()
     mapping_file = open(filename)
@@ -103,13 +104,12 @@ class GameState(object):
       res = ""
       found_something = False
       for k,v in self.buttons.items():
-        if len(k) == 1:
-          if type(v) is bool and v == True:
-            res = res + k
-            found_something = True
-          elif type(v) is int and v != 5:
-            res = str(v) + res
-            found_something = True
+        if type(v) is bool and v == True:
+          res = res + k
+          found_something = True
+        elif type(v) is int and v != 5:
+          res = str(v) + res
+          found_something = True
       if found_something:
         self.recorded_sequence.append(res)
       else:

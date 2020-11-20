@@ -23,7 +23,7 @@ class Sequence(object):
       return
 
     ## If we hit a non-digit, attempt to end the motion
-    while len(self.motion_stack) > 0:
+    while len(self.motion_stack) > 1:
       ## check motion
       for inputs, motion in self.motion_converters:
         if len(self.motion_stack) != len(inputs):
@@ -76,11 +76,12 @@ class Sequence(object):
 
       ## Pop if not found, repeat
       ## TODO clean this to have a button input more than 1 frame!!
-      if len(self.motion_stack) == 0:
+      if len(self.motion_stack) <= 1:
         continue
       ff, bb = self.motion_stack.pop(0)
       if bb != "5":
-        self.objects.append(DirectionInput(ff, bb, 1))
+        fnext, _bnext = self.motion_stack[0]
+        self.objects.append(DirectionInput(ff, bb, fnext - ff))
 
 
   def handle_button(self, btns, n):

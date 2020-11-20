@@ -12,6 +12,9 @@ from game import games
 
 from utils import *
 
+from profilehooks import profile
+
+
 def main():
   if not os.path.isfile("config.toml"):
     shutil.copyfile("default_config.toml", "config.toml")

@@ -1,6 +1,9 @@
 from os import listdir
 from os.path import isfile, join
+import threading
+from typing import List
 import pygame
+from profilehooks import profile
 
 class Renderer(object):
   def __init__(self, path : str):
@@ -8,13 +11,22 @@ class Renderer(object):
     self.padding = 10
     self.width = 50
     self.images = {}
+    self.scales = {}
     self.lookahead_frames = 90
     self.screen_width = 0
     self.screen_height = 0
-    images = [(f, f"{path}/{f}") for f in listdir(path) if isfile(join(path, f))]
+    self.path = path
+    self.ready = False
+
+
+  def start(self):
+    images = [(f, f"{self.path}/{f}") for f in listdir(self.path) if isfile(join(self.path, f))]
     images.extend([(f, f"img/common/{f}") for f in listdir("img/common") if isfile(join("img/common", f))])
+
     for key, im in images:
-      self.images[key.split(".")[0]] = pygame.image.load(im)
+      k = key.split(".")[0]
+      self.images[k] = pygame.image.load(im).convert_alpha()
+      self.scales[k] = {}
     
     pygame.font.init()
     self.font = pygame.font.Font('Roboto-Regular.ttf', 20)
@@ -53,7 +65,12 @@ class Renderer(object):
     off = (1-scale)/2.0
     x,y = pos
     newpos = (x + off*self.width, y + off*newh)
-    self.screen.blit(pygame.transform.scale(self.images[im], ((int)(self.width*scale), (int)(newh*scale))), newpos)
+
+    if scale not in self.scales[im]:
+      self.scales[im][scale] = pygame.transform.scale(self.images[im], ((int)(self.width*scale), (int)(newh*scale)))
+
+    theimage = self.scales[im][scale]
+    self.screen.blit(theimage, newpos)
 
   def pressed(self, button):
     if button in self.state.buttons and self.state.buttons[button]:
@@ -64,11 +81,12 @@ class Renderer(object):
   def render_row(self, row, sequence):
     rowtype = row.rowtype
     if rowtype == 'BUTTON':
-      self.draw_im(self.pressed(row.button), (row.x, self.padding))
       if sequence is None:
+        self.draw_im(self.pressed(row.button), (row.x, self.padding))
         return
       for renderable in sequence.objects:
         renderable.render(row)
+        self.draw_im(self.pressed(row.button), (row.x, self.padding))
 
     elif rowtype == 'DIRECTION':
       direction_draw = "5"
@@ -80,9 +98,15 @@ class Renderer(object):
       for renderable in sequence.objects:
         renderable.render(row)
 
+  @profile
   def render(self, state, screen):
     if len(self.rows) == 0:
       return
+
+    if not self.ready:
+      self.start()
+      self.ready = True
+
     self.screen = screen
     self.state = state
     w, h = screen.get_size()

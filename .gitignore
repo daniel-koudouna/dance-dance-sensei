@@ -3,3 +3,5 @@ dist/**
 __pycache__
 sequence/**
 config.toml
+mappings/
+version.txt
