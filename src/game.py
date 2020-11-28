@@ -99,6 +99,28 @@ guilty_gear_plusr = Game(name="Guilty Gear AC+R",
                        charge_motions=guilty_gear_charge(),
                        renderer=guilty_gear_renderer)
 
+def uni_renderer(r):
+  r.add_direction_row("Movement")
+  r.add_button_row("A")
+  r.add_button_row("B")
+  r.add_button_row("C")
+  r.add_button_row("D")
+
+def uni_motions():
+  return augment([
+    ("214", "214"),
+    ("236", "236"), 
+    ("623", "623"), 
+    ("41236", "41236"),
+    ("412369632147", "412369632147")
+  ])
+
+uni = Game(name="Under Night In-Birth",
+           code="uni",
+           buttons=["A","B","C","D"],
+           motions=uni_motions(),
+           charge_motions=guilty_gear_charge(),
+           renderer=uni_renderer)
 
 ##def pony_renderer(r):
 ##  r.add_direction_row("Movement")
@@ -116,4 +138,5 @@ guilty_gear_plusr = Game(name="Guilty Gear AC+R",
 ##
 
 games = [guilty_gear_xrd,
-         guilty_gear_plusr]
+         guilty_gear_plusr,
+         uni]

@@ -6,3 +6,4 @@ config.toml
 mappings/
 version.txt
 build/**
+log.txt

@@ -7,6 +7,7 @@ import time
 import threading
 
 from game import Game
+from logger import Log
 from renderer import Renderer
 from network import Network
 from sequence import Sequence
@@ -159,15 +160,19 @@ class GameState(object):
       self.buttons = self.input_manager.poll()
     else:
       if self.register_mode == "Movement":
-        next_btn = self.input_manager.poll_full_motion()
+        next_btn = self.input_manager.poll_full_motion(self.register_mode)
       else:
         next_btn = self.input_manager.poll_full(self.register_mode)
 
       if next_btn is not None:
         self.register_mode = None
-        f = open(self.mode.mappings, "a")
-        csv.writer(f).writerow(next_btn)
-        f.close()
-        self.reload_gamepad(self.mode.mappings)
+        if next_btn[0] is not "INVALID":
+          Log.debug(f"Writing new key binding {next_btn}")
+          f = open(self.mode.mappings, "a")
+          csv.writer(f).writerow(next_btn)
+          f.close()
+        else:
+          Log.debug(f"Key binding invalid: {next_btn[1]}")
 
+        self.reload_gamepad(self.mode.mappings)
 

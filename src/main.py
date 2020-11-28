@@ -9,6 +9,7 @@ import traceback
 from game_window import GameWindow
 from game_state import GameState
 from game import games
+from logger import Log
 
 from utils import *
 
@@ -16,7 +17,9 @@ from profilehooks import profile
 
 
 def main():
+  Log.debug("=== Running Dance Dance Sensei ===")
   if not os.path.isfile("config.toml"):
+    Log.debug("Config not found, copying default config")
     shutil.copyfile("default_config.toml", "config.toml")
 
   config = toml.load("config.toml")
