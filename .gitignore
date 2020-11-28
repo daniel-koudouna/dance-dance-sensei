@@ -5,3 +5,4 @@ sequence/**
 config.toml
 mappings/
 version.txt
+build/**

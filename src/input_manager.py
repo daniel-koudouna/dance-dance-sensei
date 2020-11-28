@@ -40,8 +40,7 @@ def hat_to_dir(hat):
     return 5
 
 def is_pressed(c):
-  key = ord(c)
-  return win32api.GetKeyState(key) & (1 << 7) != 0
+  return win32api.GetKeyState(int(c)) & (1 << 7) != 0
 
 def safe_int(v):
   try:
@@ -89,9 +88,9 @@ class InputManager(object):
         if d.get_axis(i) < -0.5:
           return (btn, "NegAxis", i, dev)
     
-    for i in range(65, 91):
-      if is_pressed(chr(i)):
-        return (btn, "Keyboard", chr(i), 0)
+    for i in range(32, 126):
+      if is_pressed(i):
+        return (btn, "Keyboard", i, 0)
 
     return None
 

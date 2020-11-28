@@ -17,6 +17,9 @@ class ChargeInput(Renderable):
     self.duration = duration
     self.release_key = release_key
   
+  def __repr__(self) -> str:
+    return type(self).__name__ + f"[{self.hold_key}{self.release_key}] ~ {self.frame}:{self.duration}"
+
   def render(self, row : RenderRow):
     if row.rowtype != 'DIRECTION':
       return
@@ -68,6 +71,9 @@ class MotionInput(Renderable):
     self.frame = frame
     self.motion = motion
     self.duration = duration
+
+  def __repr__(self) -> str:
+    return type(self).__name__ + f"[{self.motion}] ~ {self.frame}:{self.duration}"
   
   def render(self, row : RenderRow):
     if row.rowtype != 'DIRECTION':
@@ -110,6 +116,9 @@ class DirectionInput(Renderable):
     self.key = key
     self.duration = duration
 
+  def __repr__(self) -> str:
+    return type(self).__name__ + f"[{self.key}] ~ {self.frame}:{self.duration}"
+
   def render(self, row : RenderRow):
     if row.rowtype != 'DIRECTION':
       return
@@ -139,6 +148,9 @@ class ButtonInput(Renderable):
     self.frame = frame
     self.key = key
     self.duration = duration
+
+  def __repr__(self) -> str:
+    return type(self).__name__ + f"[{self.key}] ~ {self.frame}:{self.duration}"
 
   def render(self, row : RenderRow):
     if row.rowtype != 'BUTTON' or row.button != self.key:

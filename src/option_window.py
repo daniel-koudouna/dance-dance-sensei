@@ -16,12 +16,14 @@ class OptionWindow(ttk.Notebook):
     self.upload_pane = ui.UploadPane(self, state)
     self.controller_pane = ui.ControllerPane(self, state)
     self.download_pane = ui.DownloadPane(self, state)
+    self.editor_pane = ui.EditorPane(self, state)
 
     self.add(self.preferences_pane, text="Preferences")
     self.add(self.network_pane, text="Account")
     self.add(self.upload_pane, text="Upload")
     self.add(self.download_pane, text="Download")
     self.add(self.controller_pane, text="Controls")
+    self.add(self.editor_pane, text="Editor")
     self.pack(expand = 1, fill ="both") 
 
   def refresh(self, event):

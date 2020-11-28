@@ -1,14 +1,50 @@
 from collections import Counter
 
+from typing import List
+
 from renderable import *
 from utils import *
 
+MOTION_FRAME_WINDOW = 2
+
 class Sequence(object):
+
+  def buttons_from_line(btns : List[str], line : str):
+    res = []
+    digit = [str(char) for char in line if str(char).isdigit()]
+    if len(digit) > 0:
+      res.extend(digit)
+
+    lineres = line
+    for b in btns:
+      idx = lineres.find(b)
+      if idx >= 0:
+        lineres = lineres.replace(b, "")
+        res.append(b)
+
+    return res
+
+  def sequence_from_raw(mappings, lines):
+    btns = list(set([s[0] for s in mappings]))
+    btns.sort(key=lambda x : -len(x))
+    res = []
+
+    for l in lines:
+      line = l.strip()
+      if line == '5':
+        res.append(None)
+      else:
+        res.append(Sequence.buttons_from_line(btns, line))
+
+    return res
+
   def pop_button_stack(self, b : str, n : int):
     if b in self.button_stack:
       start = self.button_stack[b]
       del self.button_stack[b]
       self.objects.append(ButtonInput(start, b, n - start))
+    if len(self.button_stack) == 0:
+      self.last_button_up = n
 
   def handle_empty(self, n):
     keys = list(self.button_stack.keys())
@@ -18,6 +54,11 @@ class Sequence(object):
     if len(self.motion_stack) > 0 and self.motion_stack[-1][1] != "5":
       self.motion_stack.append((n, "5"))
 
+  def maybe_collapse_motion(self, n):
+    if len(self.motion_stack) == 1:
+      return
+
+
   def collapse_motion(self, n):
     if len(self.motion_stack) == 1:
       return
@@ -26,7 +67,7 @@ class Sequence(object):
     while len(self.motion_stack) > 1:
       ## check motion
       for inputs, motion in self.motion_converters:
-        if len(self.motion_stack) != len(inputs):
+        if len(self.motion_stack) < len(inputs):
           continue
 
         print(self.motion_stack)
@@ -53,6 +94,7 @@ class Sequence(object):
             self.last_motion = mm[-1]
           else:
             print("motion too long, fully splitting!!")
+            print(f"Last button up was at {self.last_button_up}")
             for ff, bb in mo:
               ## TODO more than 1 frame!
               self.objects.append(DirectionInput(ff, bb, 1))
@@ -94,32 +136,48 @@ class Sequence(object):
       else:
         if b not in self.button_stack:
           self.button_stack[b] = n
-          self.collapse_motion(n)
+          self.motion_window_counter = 1
     keys = list(self.button_stack.keys())
     for k in keys:
       if k not in btns:
         self.pop_button_stack(k, n)
 
 
-  def __init__(self, raw_inputs, motions, charge_motions):
-    self.objects = []
+  def duration(self):
+    if len(self.objects) < 1:
+      return 0
+    l = self.objects[-1]
+    return l.frame + l.duration
 
+
+  def __init__(self, raw_lines, mappings, mode):
+    self.objects = []
+    self.lines = raw_lines
     self.motion_stack = []
     self.button_stack = {}
-    self.max_motion_length = 20
+    self.max_motion_length = 25
     self.min_hold_motion_length = 30
+    self.last_button_up = 0
     self.last_motion = None
+    self.motion_window_counter = 0
 
-    self.motion_converters = list(sorted(motions, key=lambda x: x[0]))
-    self.charge_motions = charge_motions
+    self.motion_converters = list(sorted(mode.motions, key=lambda x: x[0]))
+    self.charge_motions = mode.charge_motions
+
+    raw_inputs = Sequence.sequence_from_raw(mappings, raw_lines)
 
     for n in range(len(raw_inputs)):
       action = raw_inputs[n]
-      if action['type'] == 'empty':
+      if action == None:
         self.handle_empty(n)
-      if action['type'] == 'button':
-        btns = action['buttons']
-        self.handle_button(btns, n)
+      else:
+        self.handle_button(action, n)
+
+      if self.motion_window_counter > 0:
+        self.motion_window_counter += 1
+        if self.motion_window_counter > MOTION_FRAME_WINDOW + 1:
+          self.motion_window_counter = 0
+          self.collapse_motion(n)
 
     for ff,bb in self.motion_stack:
       if bb != "5":

@@ -1,11 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
+import pygame.key
 
 DEFAULT_TEXT="Add"
 WAITING_TEXT="..."
 
 def mapping_string(tup):
   _key, btntype, val, device = tup
+  if btntype == "Keyboard":
+    kname = pygame.key.name(int(val))
+    if kname != "unknown key":
+      return f"Key {kname.capitalize()}"
+    else:
+      return f"Key {chr(int(val))}"
   return f"{btntype} {val}"
 
 class ControllerPane(ttk.Frame):
@@ -41,8 +48,9 @@ class ControllerPane(ttk.Frame):
       idx += 1
 
   def new_btn(self, btn):
-    self.var_btntext[btn].set(WAITING_TEXT)
-    self.state.register_new_button(btn)
+    if self.state.register_mode == None:
+      self.var_btntext[btn].set(WAITING_TEXT)
+      self.state.register_new_button(btn)
 
   def clear_btn(self, btn):
     self.state.clear_button(btn)

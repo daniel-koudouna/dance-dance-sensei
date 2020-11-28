@@ -38,7 +38,7 @@ class DownloadPane(ttk.Frame):
 
     r += 1
 
-    b = ttk.Button(self, text="Add", command = lambda : self.add_follower(lb))
+    b = ttk.Button(self, text="Add", command = lambda lb=lb: self.add_follower(lb))
     b.grid(row=r, column=0, padx=10, pady=10)
 
     b = ttk.Button(self, text = "Delete", command = lambda lb=lb: self.remove_follower(lb))

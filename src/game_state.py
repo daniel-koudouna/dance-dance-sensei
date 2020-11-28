@@ -1,6 +1,7 @@
 from datetime import datetime
 import csv
 import os
+from typing import List
 import pygame
 import time
 import threading
@@ -31,9 +32,9 @@ class GameState(object):
     self.idx = 0
     self.mode = mode
     self.last_sequence = None
-    self.sequence = []
     self.parsed_sequence = None
     self.is_recording = False
+    self.previous_buttons = {}
     self.buttons = {}
     self.renderer = Renderer(mode.visuals)
     os.makedirs(mode.sequences, exist_ok=True)
@@ -64,21 +65,18 @@ class GameState(object):
     self.reload_mode(self.mode)
 
 
-  def reload_sequence(self, filename):
-    seq_file = f"{self.mode.sequences}/{filename}"
-    self.last_sequence = filename 
+  def set_sequence(self, seq):
+    self.parsed_sequence = seq
     self.last_reloaded = 0
     self.is_playing = True
     self.idx = -60
-    self.sequence = []
+
+
+  def reload_sequence(self, filename):
+    seq_file = f"{self.mode.sequences}/{filename}"
+    self.last_sequence = filename 
     lines = open(seq_file).readlines()
-    for line in lines:
-      l = line.strip()
-      if l == "5":
-        self.sequence.append({"type": "empty"})
-      else:
-        self.sequence.append({"type": "button", "buttons": [str(char) for char in l if (char != ' ')] })
-    self.parsed_sequence = Sequence(self.sequence, self.mode.motions, self.mode.charge_motions)
+    self.set_sequence(Sequence(lines, self.mappings, self.mode))
 
   def refresh(self, event):
     if self.window is not None:
@@ -118,9 +116,9 @@ class GameState(object):
     if 'Play' in self.buttons and self.buttons['Play'] and self.last_reloaded > 100 and self.last_sequence is not None and not self.is_recording:
       self.reload_last_sequence()
     if 'Record' in self.buttons and self.buttons['Record']:
-      if self.is_recording and self.last_reloaded > 100:
+      if self.is_recording and not self.previous_buttons['Record']:
         self.stop_recording()
-      elif self.last_reloaded > 100:
+      elif self.last_reloaded > 50:
         self.start_recording()
 
   def start_recording(self):
@@ -139,6 +137,14 @@ class GameState(object):
     filename = f"{self.mode.sequences}/personal/{fname}_{len(self.recorded_sequence)}.txt"
     lines = [l + "\n" for l in self.recorded_sequence]
 
+    if len(lines) < 100:
+      return
+
+    actual_btns = [l for l in self.recorded_sequence if l != '5' and l != 'Record']
+
+    if len(actual_btns) < 30:
+      return
+
     os.makedirs(f"{self.mode.sequences}/personal", exist_ok=True)
     open(filename, "w").writelines(lines)
     self.window.reload_context_menu()
@@ -149,6 +155,7 @@ class GameState(object):
 
   def handle_input(self):
     if self.register_mode is None:
+      self.previous_buttons = self.buttons
       self.buttons = self.input_manager.poll()
     else:
       if self.register_mode == "Movement":
