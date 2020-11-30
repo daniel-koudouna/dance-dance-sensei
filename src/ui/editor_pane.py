@@ -24,8 +24,21 @@ class EditorPane(ttk.Frame):
 
     self.tree.bind("<<TreeviewSelect>>", self.maybe_update)
 
-    self.subframe = ttk.Frame(self)
-    self.subframe.grid(row=r, column=3, padx=10, pady=10, rowspan=3, columnspan=3, sticky="news")
+    canvas = tk.Canvas(self)
+    canvas.grid(row=r, column=3, padx=10, pady=10, rowspan=5, columnspan=3, sticky="news")
+
+    scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
+    scrollbar.grid(row=r, column=6, padx=10, pady=10, rowspan=5, sticky="nsw")
+    self.subframe = ttk.Frame(canvas)
+
+    self.subframe.bind(
+      "<Configure>",
+      lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=self.subframe, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+
 
     r += 3
 

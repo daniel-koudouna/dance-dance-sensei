@@ -66,27 +66,27 @@ class Sequence(object):
     ## If we hit a non-digit, attempt to end the motion
     while len(self.motion_stack) > 1:
       ## check motion
-      for inputs, motion in self.motion_converters:
+      print(self.motion_stack)
+
+      for inputs, motion, max_duration in self.motion_converters:
         if len(self.motion_stack) < len(inputs):
           continue
 
-        print(self.motion_stack)
-
         mo = self.motion_stack[:len(inputs)]
+        frame_end = mo[-1][0]
         mm = ''.join([m[0] for (y,m) in mo])
         if mm == inputs:
           for i in range(len(inputs)):
             self.motion_stack.pop(0)
 
           frame_start = mo[0][0]
-          frame_end = n
           print("Found motion from " + str(frame_start) + " to " + str(frame_end))
           duration = frame_end - frame_start
           frame_next_start = mo[1][0]
-          if duration <= self.max_motion_length:
+          if duration <= max_duration:
             self.objects.append(MotionInput(frame_start, motion, frame_end - frame_start))
             self.last_motion = mm[-1]
-          elif frame_end - frame_next_start <= self.max_motion_length:
+          elif frame_end - frame_next_start <= max_duration:
             print("motion too long due to held key, splitting!!")
             new_start = frame_next_start - 1
             self.objects.append(DirectionInput(frame_start, mo[0][1], new_start - frame_start))
@@ -156,12 +156,19 @@ class Sequence(object):
     self.motion_stack = []
     self.button_stack = {}
     self.max_motion_length = 25
-    self.min_hold_motion_length = 30
+    self.min_hold_motion_length = 34
     self.last_button_up = 0
     self.last_motion = None
     self.motion_window_counter = 0
 
-    self.motion_converters = list(sorted(mode.motions, key=lambda x: x[0]))
+    self.has_22 = True
+
+    self.motion_converters = [(raw, inputs, 25) for (raw,inputs) in mode.motions]
+    if self.has_22:
+      self.motion_converters.append(("252","22", 10))
+
+    self.motion_converters = list(sorted(self.motion_converters, key=lambda x: x[0]))
+
     self.charge_motions = mode.charge_motions
 
     raw_inputs = Sequence.sequence_from_raw(mappings, raw_lines)

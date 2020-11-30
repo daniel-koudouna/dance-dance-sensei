@@ -4,6 +4,7 @@ import os
 import threading
 import toml
 import requests
+import time
 
 from utils import *
 from typing import Callable, List, Any
@@ -75,6 +76,18 @@ class Network(object):
 
       async_get(f"{self.url}/user/{self.token}", cb)
 
+    if os.path.exists("version.txt"):
+      ver = open("version.txt", "r").readline().replace("\n","").strip()
+
+      def vercb(res):
+        lver = res['latest'].replace("sensei-","")
+        if lver > ver:
+          time.sleep(1)
+          print("needs update!")
+          self.state.window.prompt_update(ver, lver)
+
+      
+      async_get(f"{self.url}/version", vercb)
 
   def login(self, username : str, password : str, callback : Callable[[dict], Any]):
     async_post(f"{self.url}/login", {"username":username, "password":password}, callback)

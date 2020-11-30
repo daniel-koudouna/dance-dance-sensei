@@ -2,8 +2,11 @@ import os
 import pygame
 import threading
 import tkinter as tk
+import tkinter.messagebox as mb
 from game import games
 from option_window import OptionWindow
+import webbrowser
+
 
 def to_label(filename):
   s = filename.split(".")[0]
@@ -86,6 +89,14 @@ class GameWindow(tk.Tk):
 
   def stop(self):
     self.state.is_running = False
+
+  def prompt_update(self, current, latest):
+    res = mb.askyesno("New version available", f"There is a new version available.\n" + \
+    f"Your version: {current}\nLatest version: {latest}.\nWould you like to update?\n" + \
+    "At the moment, clicking 'Yes' will attempt to download the newest zip archive from your browser.")
+    if res:
+      webbrowser.open_new_tab(f"{self.state.network.url}/download/latest")
+    
 
   def handle_event(self, event):
     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:

@@ -111,8 +111,22 @@ def uni_motions():
     ("214", "214"),
     ("236", "236"), 
     ("623", "623"), 
+    ("3236", "623"),
     ("41236", "41236"),
-    ("412369632147", "412369632147")
+    ## 360
+    ("632147", "62486"),
+    ("6321478", "62486"),
+    ("63214789", "62486"),
+    ("632147896", "62486"),
+    ("321478963", "62486"),
+    ("214789632", "62486"),
+    ("147896321", "62486"),
+    ("478963214", "62486"),
+    ("789632147", "62486"),
+    ("896321478", "62486"),
+    ("963214789", "62486"),
+    ## 720
+    ("62486247", "62486247"),
   ])
 
 uni = Game(name="Under Night In-Birth",
@@ -121,6 +135,30 @@ uni = Game(name="Under Night In-Birth",
            motions=uni_motions(),
            charge_motions=guilty_gear_charge(),
            renderer=uni_renderer)
+
+def sg_motions():
+  return augment([
+    ("214", "214"),
+    ("236", "236"), 
+    ("623", "623"), 
+    ("63214789", "63214789")
+  ])
+
+def sg_renderer(r):
+  r.add_direction_row("Movement")
+  r.add_button_row("LP")
+  r.add_button_row("MP")
+  r.add_button_row("HP")
+  r.add_button_row("LK")
+  r.add_button_row("MK")
+  r.add_button_row("HK")
+
+skullgirls = Game(name="Skullgirls",
+           code="skullgirls",
+           buttons=["LP","MP","HP","LK", "MK", "HK"],
+           motions=sg_motions(),
+           charge_motions=guilty_gear_charge(),
+           renderer=sg_renderer)
 
 ##def pony_renderer(r):
 ##  r.add_direction_row("Movement")
@@ -140,3 +178,4 @@ uni = Game(name="Under Night In-Birth",
 games = [guilty_gear_xrd,
          guilty_gear_plusr,
          uni]
+         #skullgirls]

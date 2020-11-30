@@ -25,6 +25,14 @@ class ControllerPane(ttk.Frame):
 
     idx = 0
     self.recalc_mappings()
+
+    l = ttk.Button(self, 
+                   text="Recalibrate controller",
+                   command=lambda : self.state.input_manager.calibrate())
+    l.grid(row=idx, column=0, columnspan=4, padx=10, pady=10, sticky="news")
+
+    idx += 1
+
     for btn in self.state.mode.buttons:
       l = ttk.Label(self, text=f"{btn}")
       l.grid(row=idx, column=0, padx=10, pady=10)

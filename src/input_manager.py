@@ -66,16 +66,18 @@ class InputManager(object):
       Log.debug(f"\t{d.get_numhats()} Hats")
       Log.debug(f"\t{d.get_numballs()} Balls")
       axes = []
+      for a in range(d.get_numaxes()):
+        axes.append(d.get_axis(a))
       self.initial_axes.append(axes)
 
     self.fully_init = False
 
-  def full_init(self):
+  def calibrate(self):
     for dev in range(len(self.devices)):
       d = self.devices[dev]
       for a in range(d.get_numaxes()):
         v = d.get_axis(a)
-        self.initial_axes[dev].append(v)
+        self.initial_axes[dev][a] = v
       Log.debug(f"{d.get_name()} Initial axes: {self.initial_axes[dev]}")
 
 
@@ -130,7 +132,7 @@ class InputManager(object):
 
   def poll(self) -> Dict[str, bool]:
     if not self.fully_init:
-      self.full_init()
+      self.calibrate()
       self.fully_init = True
 
     btns = {}
