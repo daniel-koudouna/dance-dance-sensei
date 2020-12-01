@@ -187,6 +187,6 @@ class InputManager(object):
     if key_dir != 5:
       btns['Movement'] = key_dir
 
-    if btns['Movement'] == False:
+    if 'Movement' not in btns or btns['Movement'] == False:
       btns['Movement'] = 5
     return btns
