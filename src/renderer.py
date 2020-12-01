@@ -20,8 +20,10 @@ class Renderer(object):
 
 
   def start(self):
-    images = [(f, f"{self.path}/{f}") for f in listdir(self.path) if isfile(join(self.path, f))]
+    images = []
     images.extend([(f, f"img/common/{f}") for f in listdir("img/common") if isfile(join("img/common", f))])
+    images.extend([(f, f"{self.path}/{f}") for f in listdir(self.path) if isfile(join(self.path, f))])
+    images = [(k, v) for k,v in images if k.endswith("png")]
 
     for key, im in images:
       k = key.split(".")[0]

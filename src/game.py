@@ -147,10 +147,10 @@ def sg_motions():
 def sg_renderer(r):
   r.add_direction_row("Movement")
   r.add_button_row("LP")
-  r.add_button_row("MP")
-  r.add_button_row("HP")
   r.add_button_row("LK")
+  r.add_button_row("MP")
   r.add_button_row("MK")
+  r.add_button_row("HP")
   r.add_button_row("HK")
 
 skullgirls = Game(name="Skullgirls",
@@ -177,5 +177,5 @@ skullgirls = Game(name="Skullgirls",
 
 games = [guilty_gear_xrd,
          guilty_gear_plusr,
-         uni]
-         #skullgirls]
+         uni,
+         skullgirls]
