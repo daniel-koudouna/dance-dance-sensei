@@ -13,8 +13,6 @@ from logger import Log
 
 from utils import *
 
-from profilehooks import profile
-
 
 def main():
   Log.debug("=== Running Dance Dance Sensei ===")
@@ -28,6 +26,10 @@ def main():
     config['game'] = {}
     config['game']['default_game'] = games[0].code
     toml.dump(config, open("config.toml", "w"))
+
+  if os.path.exists('sequence'):
+    print("Sliently moving")
+    print(os.path.expanduser("~\.dds"))
 
 
   ## Find game from config

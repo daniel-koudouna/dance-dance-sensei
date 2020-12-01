@@ -7,7 +7,8 @@ BUILD_OPTS=--icon "logo.ico" --noconfirm  \
 					 --add-data Roboto-Regular.ttf;. \
 					 --add-data logo.png;. \
 					 --add-data logo.ico;. \
-					 --add-data img;img
+					 --add-data img;img \
+					 --uac-admin
 
 version:
 	echo $(TAG) > version.txt
