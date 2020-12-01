@@ -26,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True , icon='logo.ico')
+          console=True , uac_admin=True, icon='logo.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

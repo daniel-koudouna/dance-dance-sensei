@@ -142,28 +142,32 @@ class InputManager(object):
 
       val_i = safe_int(val)
       device_i = safe_int(device)
-      d = self.devices[device_i]
 
-      if method == 'Button' and val_i <= d.get_numbuttons():
-        btns[key] = btns[key] or d.get_button(val_i) == 1
-      elif method == 'Hat' and val_i <= d.get_numhats():
-        r = hat_to_dir(d.get_hat(val_i))
-        if btns[key] == False or r != 5:
-          btns[key] = r
-      elif method == 'PosAxis' and val_i <= d.get_numaxes():
-        btns[key] = btns[key] or self.get_axis_norm(device_i, val_i) > 0.5
-      elif method == 'NegAxis' and val_i <= d.get_numaxes():
-        btns[key] = btns[key] or self.get_axis_norm(device_i, val_i) < -0.5
-      elif method == 'DualAxis':
-        ax_1 = safe_int(val[0])
-        ax_2 = safe_int(val[1])
-        if ax_1 >= 0 and ax_2 >= 0 and ax_1 <= d.get_numaxes() and ax_2 <= d.get_numaxes():
-          v_x = self.get_axis_norm(device_i, ax_1)
-          v_y = self.get_axis_norm(device_i, ax_2)
-          r = hat_to_dir(raw_to_hat(v_x, v_y))
+      has_devices = len(self.devices) > 0
+
+      if has_devices:
+        d = self.devices[device_i]
+        if method == 'Button' and val_i <= d.get_numbuttons():
+          btns[key] = btns[key] or d.get_button(val_i) == 1
+        elif method == 'Hat' and val_i <= d.get_numhats():
+          r = hat_to_dir(d.get_hat(val_i))
           if btns[key] == False or r != 5:
             btns[key] = r
-      elif method == 'Keyboard':
+        elif method == 'PosAxis' and val_i <= d.get_numaxes():
+          btns[key] = btns[key] or self.get_axis_norm(device_i, val_i) > 0.5
+        elif method == 'NegAxis' and val_i <= d.get_numaxes():
+          btns[key] = btns[key] or self.get_axis_norm(device_i, val_i) < -0.5
+        elif method == 'DualAxis':
+          ax_1 = safe_int(val[0])
+          ax_2 = safe_int(val[1])
+          if ax_1 >= 0 and ax_2 >= 0 and ax_1 <= d.get_numaxes() and ax_2 <= d.get_numaxes():
+            v_x = self.get_axis_norm(device_i, ax_1)
+            v_y = self.get_axis_norm(device_i, ax_2)
+            r = hat_to_dir(raw_to_hat(v_x, v_y))
+            if btns[key] == False or r != 5:
+              btns[key] = r
+
+      if method == 'Keyboard':
         btns[key] = btns[key] or is_pressed(val)
 
     ## Consolidate movement keys, they take priority over pad
@@ -183,4 +187,6 @@ class InputManager(object):
     if key_dir != 5:
       btns['Movement'] = key_dir
 
+    if btns['Movement'] == False:
+      btns['Movement'] = 5
     return btns

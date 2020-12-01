@@ -65,10 +65,8 @@ def main():
         ## End drawing
         pygame.display.update()
         clock.tick(60)
-    except Exception:
-      traceback.print_exc()
-
-
+    except Exception as e:
+      Log.debug(traceback.format_exc())
 
     pygame.quit()
     state.is_running = False
@@ -80,4 +78,7 @@ def main():
 
 
 if __name__ == "__main__":
-  main()
+  try:
+    main()
+  except Exception as e:
+    Log.debug(traceback.format_exc())
