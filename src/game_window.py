@@ -72,8 +72,15 @@ class GameWindow(tk.Tk):
 
     self.popup_menu.add_command(label="Options", command=self.show_options)
 
+    self.var_metronome = tk.BooleanVar()
+    self.var_metronome.trace('w', self.toggle_metronome)
+    self.popup_menu.add_checkbutton(label="Metronome", onvalue=True, offvalue=False, variable=self.var_metronome)
+
     self.popup_menu.add_command(label="Quit",
                                 command=self.stop)
+
+  def toggle_metronome(self, *args):
+    self.state.use_metronome = self.var_metronome.get()
 
   def show_options(self):
     self.options = tk.Toplevel(self)

@@ -95,9 +95,15 @@ class Sequence(object):
           else:
             print("motion too long, fully splitting!!")
             print(f"Last button up was at {self.last_button_up}")
-            for ff, bb in mo:
-              ## TODO more than 1 frame!
-              self.objects.append(DirectionInput(ff, bb, 1))
+            if mo[0][1] != "5":
+              duration = mo[1][0] - mo[0][0]
+              self.objects.append(DirectionInput(mo[0][0], mo[0][1], duration))
+
+            print(mo)
+            w = mo[1:]
+            w.reverse()
+            for ff, bb in w:
+              self.motion_stack.insert(0, (ff,bb))
 
 
       if len(self.motion_stack) >= 2:
@@ -133,7 +139,7 @@ class Sequence(object):
           if self.last_motion == None or self.last_motion != b:
             self.motion_stack.append((n, b))
             self.last_motion = None
-      else:
+      elif b in self.action_buttons:
         if b not in self.button_stack:
           self.button_stack[b] = n
           self.motion_window_counter = 1
@@ -160,6 +166,7 @@ class Sequence(object):
     self.last_button_up = 0
     self.last_motion = None
     self.motion_window_counter = 0
+    self.action_buttons = mode.action_buttons
 
     self.has_22 = True
 

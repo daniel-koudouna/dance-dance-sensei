@@ -48,6 +48,12 @@ def main():
 
   clock = pygame.time.Clock()
 
+  soundclock = pygame.time.Clock()
+
+  pygame.mixer.init()
+  beep = pygame.mixer.Sound(file="sound/beep.wav")
+  beep.set_volume(0.75)
+
 
   def pygamethread():
     try:
@@ -72,7 +78,24 @@ def main():
     state.is_running = False
     window.quit()
 
+  def soundthread():
+    last_played = 0
+    try:
+      while state.is_running:
+        last_played += 1
+
+        if state.is_playing and state.use_metronome and last_played > 30:
+          last_played = 0
+          beep.stop()
+          beep.play(0)
+
+        soundclock.tick(240)
+    except Exception as e:
+      Log.debug(traceback.format_exc())
+
+
   threading.Thread(None, pygamethread).start()
+  threading.Thread(None, soundthread).start()
 
   window.mainloop()
 

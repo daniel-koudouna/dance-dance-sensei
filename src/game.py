@@ -11,6 +11,7 @@ class Game(object):
     self.charge_motions = kwargs["charge_motions"]
     self.renderer = kwargs["renderer"]
     self.buttons = kwargs["buttons"]
+    self.action_buttons = [b for b in kwargs['buttons']]
     self.buttons.insert(0, "Movement")
     self.buttons.insert(1, "Up")
     self.buttons.insert(2, "Down")
@@ -160,22 +161,15 @@ skullgirls = Game(name="Skullgirls",
            charge_motions=guilty_gear_charge(),
            renderer=sg_renderer)
 
-##def pony_renderer(r):
-##  r.add_direction_row("Movement")
-##  r.add_button_row("A")
-##  r.add_button_row("B")
-##  r.add_button_row("C")
-##  r.add_button_row("D")
-##
-##thems_fighting_herds = Game(name="Them's Fighting Herds", 
-##                       code="tfh",
-##                       buttons=["A", "B", "C", "D"],
-##                       motions=[],
-##                       charge_motions=[],
-##                       renderer=pony_renderer)
-##
+hisoutensoku = Game(name="Touhou 12.3 Hisoutensoku",
+              code = "hisoutensoku",
+              buttons=["A","B","C","D"],
+              motions=sg_motions(),
+              charge_motions=guilty_gear_charge(),
+              renderer=uni_renderer)
 
 games = [guilty_gear_xrd,
          guilty_gear_plusr,
          uni,
-         skullgirls]
+         skullgirls,
+         hisoutensoku]

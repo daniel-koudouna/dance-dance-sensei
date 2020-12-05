@@ -1,7 +1,7 @@
 from datetime import datetime
 import csv
 import os
-from typing import List
+from typing import List, Union
 import pygame
 import time
 import threading
@@ -23,10 +23,14 @@ class GameState(object):
     self.config = config
     self.network = Network(self)
     self.register_mode = None
+    self.last_registered = 0
+    self.parsed_sequence : Union[Sequence,None] = None
 
   def render(self, screen):
     self.idx += 1
     self.renderer.render(self, screen)
+    if self.is_playing and self.idx > self.parsed_sequence.duration():
+      self.is_playing = False
 
   def reload_mode(self, mode : Game):
     self.last_reloaded = 0
@@ -35,6 +39,8 @@ class GameState(object):
     self.last_sequence = None
     self.parsed_sequence = None
     self.is_recording = False
+    self.is_playing = False
+    self.use_metronome = False
     self.previous_buttons = {}
     self.buttons = {}
     self.renderer = Renderer(mode.visuals)
@@ -52,7 +58,8 @@ class GameState(object):
 
 
   def register_new_button(self, btn):
-    self.register_mode = btn
+    if self.last_registered > 30:
+      self.register_mode = btn
 
   def clear_button(self, btn):
     print(f"CLEARING BUTTON {btn}")
@@ -99,6 +106,7 @@ class GameState(object):
   def update(self):
     self.handle_input()
     self.last_reloaded += 1
+    self.last_registered += 1
     if self.is_recording:
       res = ""
       found_something = False
@@ -166,6 +174,7 @@ class GameState(object):
 
       if next_btn is not None:
         self.register_mode = None
+        self.last_registered = 0
         if next_btn[0] is not "INVALID":
           Log.debug(f"Writing new key binding {next_btn}")
           f = open(self.mode.mappings, "a")
