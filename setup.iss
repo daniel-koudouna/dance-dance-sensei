@@ -2,7 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Dance Dance Sensei"
-#define MyAppVersion "0.8.2"
+#define VerFile FileOpen("version.txt")
+#define MyAppVersion FileRead(VerFile)
+#expr FileClose(VerFile)
+#undef VerFile
 #define MyAppPublisher "MacDoniel"
 #define MyAppURL "https://www.macdoniel.co.uk/posts/dance-dance-sensei"
 #define MyAppExeName "sensei.exe"
@@ -21,8 +24,8 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=dds-setup
-SetupIconFile=C:\Users\Daniel\Desktop\ddrgg\dist\sensei\logo.ico
+OutputBaseFilename=dds-setup-{#MyAppVersion}
+SetupIconFile=logo.ico
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
@@ -34,8 +37,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Daniel\Desktop\ddrgg\dist\sensei\sensei.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Daniel\Desktop\ddrgg\dist\sensei\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\dist\sensei\sensei.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\dist\sensei\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

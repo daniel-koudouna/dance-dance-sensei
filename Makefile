@@ -8,6 +8,7 @@ BUILD_OPTS=--icon "logo.ico" --noconfirm  \
 					 --add-data logo.png;. \
 					 --add-data logo.ico;. \
 					 --add-data img;img \
+					 --add-data sound;sound \
 					 --uac-admin
 
 version:
@@ -18,6 +19,9 @@ debug: version
 
 build: version
 	pyinstaller src/main.py --name "sensei" --noconsole $(BUILD_OPTS)
+
+installer: build
+	iscc.exe ./setup.iss
 
 zip: build
 	cd dist && 7z a "sensei-$(TAG).zip" sensei
