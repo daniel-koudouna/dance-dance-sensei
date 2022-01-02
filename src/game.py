@@ -92,6 +92,13 @@ guilty_gear_xrd = Game(name="Guilty Gear Xrd",
                        motions=guilty_gear_motions(),
                        charge_motions=guilty_gear_charge(),
                        renderer=guilty_gear_renderer)
+                      
+guilty_gear_strive = Game(name="Guilty Gear Strive",
+                          code="ggst",
+                          buttons=["P", "K", "S", "H", "D"],
+                          motions=guilty_gear_motions(),
+                          charge_motions=guilty_gear_charge(),
+                          renderer=guilty_gear_renderer)
 
 guilty_gear_plusr = Game(name="Guilty Gear AC+R", 
                        code="plusr",
@@ -154,12 +161,33 @@ def sg_renderer(r):
   r.add_button_row("HP")
   r.add_button_row("HK")
 
+def kof_renderer(r):
+  r.add_direction_row("Movement")
+  r.add_button_row("LP")
+  r.add_button_row("LK")
+  r.add_button_row("HP")
+  r.add_button_row("HK")
+
 skullgirls = Game(name="Skullgirls",
            code="skullgirls",
            buttons=["LP","MP","HP","LK", "MK", "HK"],
            motions=sg_motions(),
            charge_motions=guilty_gear_charge(),
            renderer=sg_renderer)
+
+kof_13 = Game(name="King of Fighters XIII",
+              code="kof13",
+              buttons=["LP", "HP", "LK", "HK"],
+              motions=sg_motions,
+              charge_motions=guilty_gear_charge(),
+              renderer=kof_renderer)
+
+kof_2kum = Game(name="King of Fighters 2003 UM",
+              code="kof2kum",
+              buttons=["LP", "HP", "LK", "HK"],
+              motions=sg_motions,
+              charge_motions=guilty_gear_charge(),
+              renderer=kof_renderer)
 
 hisoutensoku = Game(name="Touhou 12.3 Hisoutensoku",
               code = "hisoutensoku",
@@ -168,8 +196,19 @@ hisoutensoku = Game(name="Touhou 12.3 Hisoutensoku",
               charge_motions=guilty_gear_charge(),
               renderer=uni_renderer)
 
+blazblue_cf = Game(name="BlazBlue Centralfiction",
+                   code="bbcf",
+                   buttons=["A","B","C","D"],
+                   motions=uni_motions(),
+                   charge_motions=guilty_gear_charge(),
+                   renderer=uni_renderer)
+
 games = [guilty_gear_xrd,
          guilty_gear_plusr,
+         guilty_gear_strive,
+         blazblue_cf,
          uni,
+         kof_13,
+         kof_2kum,
          skullgirls,
          hisoutensoku]
