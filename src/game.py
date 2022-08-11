@@ -168,8 +168,24 @@ hisoutensoku = Game(name="Touhou 12.3 Hisoutensoku",
               charge_motions=guilty_gear_charge(),
               renderer=uni_renderer)
 
+melty = Game(name="Melty Blood: Type Lumina",
+  code="mbtl",
+  buttons=["A","B","C","D"],
+  motions=uni_motions(),
+  charge_motions=guilty_gear_charge(),
+  renderer=uni_renderer)
+
+p4au = Game(name="Persona 4 Arena Ultimax",
+  code="p4au",
+  buttons=["A", "B", "C", "D"],
+    motions=sg_motions(),
+    charge_motions=guilty_gear_charge(),
+    renderer=uni_renderer)
+
 games = [guilty_gear_xrd,
          guilty_gear_plusr,
+         melty,
          uni,
          skullgirls,
-         hisoutensoku]
+         hisoutensoku,
+         p4au]

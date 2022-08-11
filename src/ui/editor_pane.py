@@ -3,6 +3,7 @@ import toml
 import ttkwidgets
 import tkinter as tk
 from tkinter import ttk
+from renderable import ButtonInput
 
 from sequence import Sequence
 
@@ -16,6 +17,7 @@ class EditorPane(ttk.Frame):
     self.sequence = []
     self.sub_sequences = []
     self.var_filename = tk.StringVar("")
+    self.var_bpm = tk.IntVar(value=50)
 
     r = 0
 
@@ -25,10 +27,10 @@ class EditorPane(ttk.Frame):
     self.tree.bind("<<TreeviewSelect>>", self.maybe_update)
 
     canvas = tk.Canvas(self)
-    canvas.grid(row=r, column=3, padx=10, pady=10, rowspan=5, columnspan=3, sticky="news")
+    canvas.grid(row=r, column=3, padx=10, pady=10, rowspan=5, columnspan=9, sticky="news")
 
     scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
-    scrollbar.grid(row=r, column=6, padx=10, pady=10, rowspan=5, sticky="nsw")
+    scrollbar.grid(row=r, column=15, padx=0, pady=10, rowspan=5, sticky="nsw")
     self.subframe = ttk.Frame(canvas)
 
     self.subframe.bind(
@@ -49,6 +51,17 @@ class EditorPane(ttk.Frame):
 
     ll = ttk.Entry(self, textvariable=self.var_filename)
     ll.grid(row=r, column=0, padx=10, pady=10, columnspan=3, sticky="ew")
+     
+    r +=1
+
+    ll = ttk.Label(self, text="Enter BPM:")
+    ll.grid(row=r, column=0, padx=10, pady=10, sticky="w")
+
+    r +=1
+
+    ll = ttk.Entry(self, textvariable=self.var_bpm)
+    ll.grid(row=r, column=0, padx=10, pady=10, columnspan=3, sticky="ew")
+    
 
     self.reset()
 
@@ -79,13 +92,33 @@ class EditorPane(ttk.Frame):
       filename = f"{self.state.mode.sequences}/personal/{fname}.txt"
       os.makedirs(f"{self.state.mode.sequences}/personal", exist_ok=True)
       if not os.path.exists(filename):
-        open(filename, "w").writelines(lines)
+        handle = open(filename, "w")
+        lines_to_write = ["# bpm: " + str(self.var_bpm.get()) + "\n"]
+        lines_to_write.extend(lines)
+        handle.writelines(lines_to_write)
         self.var_filename.set("")
         self.reset() 
 
   def maybe_update(self, event):
     print(self.tree.selection())
     self.selected_file.set(self.tree.selection()[0])
+
+  def play_seq(self, seq):
+    bpm = self.var_bpm.get()
+    seq.bpm = bpm
+    self.state.set_sequence(seq)
+
+  def fit_bpm(self, seq):
+    frames = [o.frame for o in seq.objects if isinstance(o,ButtonInput)]
+    start = frames[0]
+    frames = [f - start for f in frames]
+    diffs = []
+    for i in range(len(frames) - 1):
+      d = frames[i + 1] - frames[i]
+      if d > 2:
+        diffs.append(d)
+    print(diffs)
+    self.var_bpm.set(10)
 
   def reload(self, *args):
     lines = open(self.selected_file.get()).readlines()
@@ -112,10 +145,13 @@ class EditorPane(ttk.Frame):
 
     for i, ss in enumerate(self.sub_sequences):
       ll = ttk.Label(self.subframe, text=f"Attempt #{i+1}, {ss.duration()} frames" )
-      ll.grid(row=i, column=0, padx=10, pady=10, sticky="w")
+      ll.grid(row=i, column=0, padx=5, pady=10, sticky="w")
 
-      ll = ttk.Button(self.subframe, text="Play", command= lambda seq=ss: self.state.set_sequence(seq))
-      ll.grid(row=i, column=1, padx=10, pady=10, sticky="w")
+      ll = ttk.Button(self.subframe, text="Play", command= lambda seq=ss: self.play_seq(seq))
+      ll.grid(row=i, column=1, padx=5, pady=10, sticky="w")
+
+      ll = ttk.Button(self.subframe, text="Fit BPM", command= lambda seq=ss: self.fit_bpm(seq))
+      ll.grid(row=i, column=2, padx=5, pady=10, sticky="w")
 
       ll = ttk.Button(self.subframe, text="Export", command= lambda seq=ss: self.export(seq.lines))
-      ll.grid(row=i, column=2, padx=10, pady=10, sticky="w")
+      ll.grid(row=i, column=3, padx=5, pady=10, sticky="w")

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Dance Dance Sensei"
-#define MyAppVersion "0.8.2"
+#define MyAppVersion "0.8.3-2-g021f2c4"
 #define MyAppPublisher "MacDoniel"
 #define MyAppURL "https://www.macdoniel.co.uk/posts/dance-dance-sensei"
 #define MyAppExeName "sensei.exe"
@@ -21,7 +21,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=dds-setup
+OutputBaseFilename=sensei-0.8.3-2-g021f2c4
 SetupIconFile=C:\Users\Daniel\Desktop\ddrgg\dist\sensei\logo.ico
 Compression=lzma
 SolidCompression=yes
@@ -43,5 +43,4 @@ Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: runascurrentuser nowait postinstall

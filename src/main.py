@@ -5,6 +5,7 @@ import threading
 import toml
 import traceback
 
+import time
 
 from game_window import GameWindow
 from game_state import GameState
@@ -36,6 +37,8 @@ def main():
   game_id = config['game']['default_game']
   game = first(games, lambda x : x.code == game_id)
 
+  pygame.mixer.init()
+
   state = GameState(game, config)
   window = GameWindow(state)
 
@@ -47,13 +50,6 @@ def main():
   screen = pygame.display.set_mode((width,height))
 
   clock = pygame.time.Clock()
-
-  soundclock = pygame.time.Clock()
-
-  pygame.mixer.init()
-  beep = pygame.mixer.Sound(file="sound/beep.wav")
-  beep.set_volume(0.75)
-
 
   def pygamethread():
     try:
@@ -79,17 +75,10 @@ def main():
     window.quit()
 
   def soundthread():
-    last_played = 0
     try:
       while state.is_running:
-        last_played += 1
-
-        if state.is_playing and state.use_metronome and last_played > 30:
-          last_played = 0
-          beep.stop()
-          beep.play(0)
-
-        soundclock.tick(240)
+        state.update_audio()
+        clock.tick(240)
     except Exception as e:
       Log.debug(traceback.format_exc())
 

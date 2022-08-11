@@ -6,6 +6,8 @@ import pygame
 import time
 import threading
 
+import winsound
+
 from game import Game
 from logger import Log
 from renderer import Renderer
@@ -13,23 +15,30 @@ from network import Network
 from sequence import Sequence
 
 from input_manager import InputManager
+from audio_manager import AudioManager
 
 class GameState(object):
+  PLAY_DELAY = 60
+
   def __init__(self, mode, config):
     self.is_running = True
     self.window = None
     self.input_manager = InputManager()
+    self.bpm = Sequence.DEFAULT_BPM
+    self.audio_manager = AudioManager("sound/beep.wav", "sound/hit.wav", self.bpm, 0)
     self.reload_mode(mode)
     self.config = config
     self.network = Network(self)
     self.register_mode = None
     self.last_registered = 0
     self.parsed_sequence : Union[Sequence,None] = None
+    self.last_played = 0
+    self.hit_inputs = []
 
   def render(self, screen):
     self.idx += 1
     self.renderer.render(self, screen)
-    if self.is_playing and self.idx > self.parsed_sequence.duration():
+    if self.is_playing and self.idx > self.parsed_sequence.duration() + GameState.PLAY_DELAY:
       self.is_playing = False
 
   def reload_mode(self, mode : Game):
@@ -77,7 +86,14 @@ class GameState(object):
     self.parsed_sequence = seq
     self.last_reloaded = 0
     self.is_playing = True
-    self.idx = -60
+    self.idx = -GameState.PLAY_DELAY
+    self.bpm = seq.bpm
+    self.hit_inputs = []
+
+    first_frame = seq.first_frame()
+    print("Setting sequence audio")
+    self.hitsound = pygame.mixer.Sound("sound/hit.wav")
+    self.audio_manager = AudioManager("sound/beep.wav", "sound/hit.wav", self.bpm, first_frame - self.idx)
 
 
   def reload_sequence(self, filename):
@@ -102,6 +118,23 @@ class GameState(object):
     self.mappings = lines
     self.input_manager.set_mappings(self.mode, lines)
     self.refresh(("mappings", None))
+  
+  def hit_new_correct_input(self) -> bool:
+    for k,v in self.buttons.items():
+      if type(v) is bool and v == True:
+        return True and self.idx % 2 == 0
+
+    return False
+
+  def update_audio(self):
+    if self.parsed_sequence is None:
+      return
+
+    play_sound = self.is_playing and self.use_metronome
+
+    play_hit = play_sound and self.hit_new_correct_input()
+
+    self.audio_manager.update(play_sound, False)
 
   def update(self):
     self.handle_input()
@@ -121,6 +154,9 @@ class GameState(object):
         self.recorded_sequence.append(res)
       else:
         self.recorded_sequence.append("5")
+
+    # if self.hit_new_correct_input():
+    #   self.hitsound.play()
 
     if 'Play' in self.buttons and self.buttons['Play'] and self.last_reloaded > 100 and self.last_sequence is not None and not self.is_recording:
       self.reload_last_sequence()

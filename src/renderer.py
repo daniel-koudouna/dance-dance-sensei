@@ -78,7 +78,7 @@ class Renderer(object):
     if button in self.state.buttons and self.state.buttons[button]:
       return button
     else:
-      return button + "_empty"
+      return "empty"
 
   def render_row(self, row, sequence):
     rowtype = row.rowtype

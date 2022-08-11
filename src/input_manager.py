@@ -57,6 +57,7 @@ class InputManager(object):
     self.complete_mappings : bool = False
     self.devices = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
     self.initial_axes = []
+    self.initial_buttons = []
     Log.debug(f"{len(self.devices)} Devices detected")
     for d in self.devices:
       d.init()

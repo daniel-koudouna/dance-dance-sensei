@@ -7,7 +7,9 @@ from utils import *
 
 MOTION_FRAME_WINDOW = 2
 
+
 class Sequence(object):
+  DEFAULT_BPM = 60
 
   def buttons_from_line(btns : List[str], line : str):
     res = []
@@ -24,6 +26,18 @@ class Sequence(object):
 
     return res
 
+  def read_bpm(lines):
+    for l in lines:
+      line = l.strip()
+      if not line.startswith("# bpm: "):
+        continue
+      try:
+        bpm = int(line.split(":")[1].strip())
+        return bpm
+      except ValueError:
+        continue
+    return Sequence.DEFAULT_BPM
+
   def sequence_from_raw(mappings, lines):
     btns = list(set([s[0] for s in mappings]))
     btns.sort(key=lambda x : -len(x))
@@ -31,6 +45,8 @@ class Sequence(object):
 
     for l in lines:
       line = l.strip()
+      if line.startswith("#"):
+        continue
       if line == '5':
         res.append(None)
       else:
@@ -155,6 +171,15 @@ class Sequence(object):
     l = self.objects[-1]
     return l.frame + l.duration
 
+  def first_frame(self):
+    abtns = [o for o in self.objects if type(o) is ButtonInput and o.key in self.action_buttons]
+
+    if len(abtns) < 1:
+      return 0
+
+    print(abtns[0])
+    return abtns[0].frame
+
 
   def __init__(self, raw_lines, mappings, mode):
     self.objects = []
@@ -167,6 +192,7 @@ class Sequence(object):
     self.last_motion = None
     self.motion_window_counter = 0
     self.action_buttons = mode.action_buttons
+    self.bpm = Sequence.DEFAULT_BPM
 
     self.has_22 = True
 
@@ -179,6 +205,7 @@ class Sequence(object):
     self.charge_motions = mode.charge_motions
 
     raw_inputs = Sequence.sequence_from_raw(mappings, raw_lines)
+    self.bpm = Sequence.read_bpm(raw_lines)
 
     for n in range(len(raw_inputs)):
       action = raw_inputs[n]

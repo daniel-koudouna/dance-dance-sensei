@@ -6,6 +6,9 @@ import tkinter.messagebox as mb
 from game import games
 from option_window import OptionWindow
 import webbrowser
+import requests
+import tempfile
+
 
 
 def to_label(filename):
@@ -100,9 +103,15 @@ class GameWindow(tk.Tk):
   def prompt_update(self, current, latest):
     res = mb.askyesno("New version available", f"There is a new version available.\n" + \
     f"Your version: {current}\nLatest version: {latest}.\nWould you like to update?\n" + \
-    "At the moment, clicking 'Yes' will attempt to download the newest zip archive from your browser.")
+    "Clicking 'Yes' will download and install the newest version automatically.")
     if res:
-      webbrowser.open_new_tab(f"{self.state.network.url}/download/latest")
+      url = f"{self.state.network.url}/download/latest"
+      myfile = requests.get(url)
+      os.makedirs("Update", exist_ok=True)
+      open('Update/dds-setup.exe', 'wb').write(myfile.content)
+      inno_args = ["/SILENT", "/SP-", "/NOICONS", "/RESTARTAPPLICATIONS"]
+      os.execv("Update/dds-setup.exe",inno_args)
+
     
 
   def handle_event(self, event):
